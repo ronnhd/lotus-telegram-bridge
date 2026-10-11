@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  lotus-bridge:
+    build: .
+    container_name: lotus-telegram-bridge
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      - PORT=8080
+      - HOST=0.0.0.0
+      - LOTUS_API_BASE=https://bot.lotuschat.vn
+      - TARGET_BOT_WEBHOOK_URL=http://your-bot-backend:8443/webhook
+      - WEBHOOK_SECRET=your_webhook_secret_here
+      - ALLOWED_USERS=
+      - LOG_LEVEL=INFO
