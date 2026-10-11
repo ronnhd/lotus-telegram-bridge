@@ -31,6 +31,17 @@ Vietnam Lotus Chat exposes endpoints modeled after the Telegram Bot API (`sendMe
 
 ---
 
+## Documentation
+
+Comprehensive guides and protocol analysis are maintained in the [GitHub Wiki](https://github.com/ronnhd/lotus-telegram-bridge/wiki):
+
+* **[Lotus Chat API Quirks & Gotchas](https://github.com/ronnhd/lotus-telegram-bridge/wiki/Lotus-Chat-API-Quirks)**: Detailed breakdown of the 10 server-side protocol bugs, schema incompatibilities, and documentation errors.
+* **[Getting Started & Deployment](https://github.com/ronnhd/lotus-telegram-bridge/wiki/Getting-Started-&-Deployment)**: Docker Compose and Python setup instructions, including Lotus webhook registration.
+* **[Integration Guide](https://github.com/ronnhd/lotus-telegram-bridge/wiki/Integration-Guide)**: Plug-and-play guides for python-telegram-bot, Telegraf, telebot, grammY, and AI platforms.
+* **[Troubleshooting & FAQ](https://github.com/ronnhd/lotus-telegram-bridge/wiki/Troubleshooting-&-FAQ)**: Solutions for invisible messages, error codes, and expired CDN URLs.
+
+---
+
 ## Architecture
 
 ```
