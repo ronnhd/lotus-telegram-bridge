@@ -1,32 +1,33 @@
 # Integration Guide
 
-Hướng dẫn cấu hình các thư viện và framework Telegram Bot phổ biến để hoạt động với **Lotus Telegram Bridge**.
+A complete guide for configuring popular Telegram Bot libraries and AI Agent platforms to work seamlessly with **Lotus Telegram Bridge**.
 
-Nguyên tắc chung: Bạn không cần sửa đổi bất kỳ logic code nào của bot, chỉ cần đổi **Base URL** trỏ về Bridge (`http://localhost:8080/bot` hoặc `http://localhost:8080`).
+**Key Principle**: You do **not** need to modify any of your bot's core business logic or message handlers. You only need to redirect the **API Base URL** to the Lotus Telegram Bridge (`http://localhost:8080/bot` or `http://localhost:8080`).
 
 ---
 
 ## 1. python-telegram-bot (v20+)
 
-Cấu hình tham số `base_url` trong `ApplicationBuilder`:
+Configure the `base_url` parameter using `ApplicationBuilder`:
 
 ```python
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
 from telegram import Update
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("Xin chào từ Lotus Chat qua Bridge!")
+    # Lotus Telegram Bridge automatically converts Markdown to safe Lotus HTML
+    await update.message.reply_text("Hello from Lotus Chat via Lotus Telegram Bridge!")
 
 app = (
     ApplicationBuilder()
     .token("YOUR_LOTUS_BOT_TOKEN")
-    .base_url("http://localhost:8080/bot")  # Trỏ về Bridge
+    .base_url("http://localhost:8080/bot")  # Point to the Bridge
     .build()
 )
 
 app.add_handler(CommandHandler("start", start))
 
-# Chạy webhook nhận update từ Bridge
+# Run webhook receiving normalized updates from the Bridge
 app.run_webhook(
     listen="0.0.0.0",
     port=8443,
@@ -38,21 +39,21 @@ app.run_webhook(
 
 ## 2. Telegraf (Node.js)
 
-Cấu hình option `telegram.apiRoot`:
+Configure the `telegram.apiRoot` option:
 
 ```javascript
 const { Telegraf } = require('telegraf');
 
 const bot = new Telegraf(process.env.LOTUS_BOT_TOKEN, {
   telegram: {
-    apiRoot: 'http://localhost:8080', // Trỏ về Bridge
+    apiRoot: 'http://localhost:8080', // Point to the Bridge
   },
 });
 
-bot.start((ctx) => ctx.reply('Xin chào từ Lotus Chat!'));
+bot.start((ctx) => ctx.reply('Hello from Vietnam Lotus Chat!'));
 
 bot.on('text', (ctx) => {
-  ctx.reply(`Bạn vừa nhắn: ${ctx.message.text}`);
+  ctx.reply(`Echo: ${ctx.message.text}`);
 });
 
 bot.launch();
@@ -62,20 +63,20 @@ bot.launch();
 
 ## 3. pyTelegramBotAPI (telebot)
 
-Sử dụng `apihelper.API_URL`:
+Override `apihelper.API_URL`:
 
 ```python
 import telebot
 from telebot import apihelper
 
-# Trỏ API URL về Bridge
+# Point base API URL to the Bridge
 apihelper.API_URL = "http://localhost:8080/bot{0}/{1}"
 
 bot = telebot.TeleBot("YOUR_LOTUS_BOT_TOKEN")
 
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
-    bot.reply_to(message, "Xin chào từ telebot trên Lotus Chat!")
+    bot.reply_to(message, "Hello from telebot running on Lotus Chat!")
 
 bot.infinity_polling()
 ```
@@ -84,18 +85,18 @@ bot.infinity_polling()
 
 ## 4. grammY (TypeScript / Node.js)
 
-Cấu hình `client.apiRoot`:
+Configure `client.apiRoot`:
 
 ```typescript
 import { Bot } from "grammy";
 
 const bot = new Bot("YOUR_LOTUS_BOT_TOKEN", {
   client: {
-    apiRoot: "http://localhost:8080", // Trỏ về Bridge
+    apiRoot: "http://localhost:8080", // Point to the Bridge
   },
 });
 
-bot.command("start", (ctx) => ctx.reply("Xin chào từ grammY!"));
+bot.command("start", (ctx) => ctx.reply("Hello from grammY on Lotus Chat!"));
 bot.start();
 ```
 
@@ -103,8 +104,8 @@ bot.start();
 
 ## 5. Dify / n8n / AI Agent Platforms
 
-Với các nền tảng no-code hoặc AI Workflow:
-1. Trong cấu hình Telegram Bot node / credential:
-2. Nhập Bot Token cấp bởi Lotus Chat.
-3. Trong phần **Custom API Endpoint** / **Base URL**, điền URL của Bridge:
+For no-code agent platforms, workflow automation engines, and custom agents:
+1. In your **Telegram Bot** node or credential settings:
+2. Enter the Bot Token assigned by Vietnam Lotus Chat.
+3. In the **Custom API Endpoint** or **Base URL** field, specify the Bridge endpoint:
    `http://lotus-bridge:8080/bot`

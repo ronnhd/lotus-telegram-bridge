@@ -139,6 +139,10 @@ async def outbound_api_call(token: str, method: str, request: Request):
             body["text"] = markdown_to_lotus_html(body["text"])
             body["parse_mode"] = "HTML"
 
+        # Handle sendMediaGroup parameter renaming (media -> media_group)
+        if method == "sendMediaGroup" and "media" in body:
+            body["media_group"] = body.pop("media")
+
         # Media field mapping
         for media_field in ("photo", "document", "voice", "video", "audio"):
             if media_field in body:

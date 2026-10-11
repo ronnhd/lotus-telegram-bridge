@@ -1,20 +1,20 @@
 # Lotus Telegram Bridge Wiki
 
-Chào mừng bạn đến với tài liệu kỹ thuật chính thức của **Lotus Telegram Bridge** — bộ Gateway và Reverse Proxy chuyển đổi giao thức 2 chiều giữa **Vietnam Lotus Chat Bot API** (`bot.lotuschat.vn`) và **Telegram Bot API**.
+Welcome to the technical documentation for **Lotus Telegram Bridge** — a lightweight, bidirectional reverse proxy and protocol gateway translating between [Vietnam Lotus Chat Bot API](https://lotuschat.vn/) (`bot.lotuschat.vn`) and standard [Telegram Bot API](https://core.telegram.org/bots/api) specifications.
 
 ---
 
-### 📚 Danh mục tài liệu
+### 📚 Documentation Index
 
-* **[[Home]]**: Trang chủ và tổng quan kiến trúc.
-* **[[Lotus Chat API Quirks & Gotchas|Lotus-Chat-API-Quirks]]**: Chi tiết 7 dị tật server-side của Lotus Chat so với chuẩn Telegram Bot API.
-* **[[Getting Started & Deployment|Getting-Started-&-Deployment]]**: Hướng dẫn triển khai Standalone Proxy qua Docker Compose và Python virtual environment.
-* **[[Integration Guide|Integration-Guide]]**: Hướng dẫn cấu hình `base_url` cho python-telegram-bot, Telegraf, telebot, grammY, n8n, Dify và AI Agent.
-* **[[Troubleshooting & FAQ|Troubleshooting-&-FAQ]]**: Tổng hợp lỗi thường gặp (400, 401, 500, tin nhắn tàng hình, CDN link hết hạn).
+* **[[Home]]**: Overview, architecture, and core capabilities.
+* **[[API Quirks & Architecture Gotchas|Lotus-Chat-API-Quirks]]**: In-depth analysis of 10 server-side protocol bugs, schema incompatibilities, and documentation errors in Lotus Chat Bot.
+* **[[Getting Started & Deployment|Getting-Started-&-Deployment]]**: Production deployment guides via Docker Compose and standalone Python services.
+* **[[Integration Guide|Integration-Guide]]**: Plug-and-play guides for python-telegram-bot, Telegraf (Node.js), telebot, grammY, n8n, Dify, and AI agent frameworks.
+* **[[Troubleshooting & FAQ|Troubleshooting-&-FAQ]]**: Diagnosing silent drops, error 400/500/502, expired CDN links, and invisible group messages.
 
 ---
 
-### 🚀 Tổng quan kiến trúc 2 chiều
+### 🚀 Bidirectional Gateway Architecture
 
 ```
                   ┌──────────────────────────────────────────────┐
@@ -25,5 +25,17 @@ Chào mừng bạn đến với tài liệu kỹ thuật chính thức của **L
                   └──────────────────────────────────────────────┘
 ```
 
-1. **Inbound Webhook Proxy**: Nhận webhook từ Lotus Chat (`/webhook`), chuẩn hóa cấu trúc JSON cho đúng chuẩn Telegram rồi chuyển tiếp tới bot backend.
-2. **Outbound API Interceptor**: Đóng vai trò Telegram Bot API Server giả lập (`/bot<token>/<method>`). Bot backend chỉ cần trỏ `base_url` về bridge; bridge sẽ tự động format Markdown thành HTML, đổi tên field upload media thành `file`, và bypass lỗi 500 của server Lotus.
+#### 1. Inbound Webhook Proxy
+Lotus Chat webhooks violate several strict Telegram schema requirements:
+* Rewrites 16-digit private conversation IDs to recipient `user.id`.
+* Injects missing `is_bot: false` flags into `User` objects.
+* Wraps bare-integer `reply_to_message` IDs into valid Telegram `Message` objects.
+* Extracts and registers signed temporary CDN URLs (`link_cdn`) for downstream file fetching.
+* Normalizes non-standard `Secret:` headers to `X-Telegram-Bot-Api-Secret-Token`.
+
+#### 2. Outbound API Interceptor
+Standard Telegram SDKs point their `base_url` to `http://localhost:8080`:
+* Intercepts media uploads (`sendPhoto`, `sendDocument`, `sendVoice`, etc.) and forces the form field key to `file`.
+* Rewrites `sendMediaGroup` parameter `media` to Lotus's non-standard `media_group`.
+* Emulates Telegram's broken `getFile` endpoint by serving cached CDN links.
+* Translates Markdown/MarkdownV2 into safe HTML tags (`<b>`, `<i>`, `<code>`, `<pre>`, `<a>`), automatically forcing `parse_mode="HTML"`.
